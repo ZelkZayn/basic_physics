@@ -1,0 +1,83 @@
+import pygame 
+import random
+
+# Basic Intiliaization
+pygame.init()
+screen = pygame.display.set_mode((1280, 720))
+clock = pygame.time.Clock()
+running = True
+dt = 0
+debounce = False
+
+# Constants
+gravity_constant = 9.8
+radius = 30
+
+# Circle class group
+class Circle(pygame.sprite.Sprite):
+    # __init__ method is used in order to intialize a object, made using the class in python. It accepts the arguements that are passed in through as your creating a new object with
+    # the class.
+    def __init__(self, position):
+        # Intializes the Spirite, so it can handle things such as updating and adding will work
+        super().__init__()
+        # Creates a surface for the circle to be drawn onto
+        # pygame.SRCALPHA, creates a transparent background, so any pixels i don't fill in are transparent
+        self.image = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+        # random colour
+        rgb_color = (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255)
+        )
+        # drawing the circle onto the surface
+        pygame.draw.circle(self.image, rgb_color,(radius, radius), radius)
+        # creates a rectangle at the position in the 
+        self.rect = self.image.get_rect(center = position)
+        self.velocity = pygame.math.Vector2(0,0)
+
+
+# Group to hold all the spirites
+spirite_group = pygame.sprite.Group()
+
+
+
+while running:
+    # Checks if the user clicks the x button to get rid of the screen, need this otherwise it wont work
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False         
+
+    # checks if the user presses the left mouse button
+    mouse_one = pygame.mouse.get_pressed()[0]
+    mouse_one_pressed = pygame.mouse.get_pressed()[0]
+    
+    # if the user does click the left mouse button, then it gets the current mouses position
+    if mouse_one and not debounce:
+        mouse_pos = pygame.mouse.get_pos()
+        # creates a circle at the mouse position
+        spirite_group.add(Circle(mouse_pos))
+        debounce = True
+
+    target = pygame.Rect(0, 660, 1280, 60)
+
+    if not mouse_one_pressed:
+        debounce = False
+
+    for ball in spirite_group:
+        ball.rect.move_ip(ball.velocity)
+        ball.velocity.y += gravity_constant * dt
+        if ball.rect.colliderect(target):
+            ball.velocity.y *= -1
+
+    screen.fill((255,255,255))
+    pygame.draw.rect(screen, "green", target)
+    spirite_group.draw(screen)
+    pygame.display.flip()
+
+    dt = clock.tick(60) / 1000
+
+
+
+
+pygame.quit()
+
