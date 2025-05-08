@@ -1,5 +1,6 @@
 import pygame 
 import random
+import math
 
 # Basic Intiliaization
 pygame.init()
@@ -34,7 +35,30 @@ class Circle(pygame.sprite.Sprite):
         # creates a rectangle at the position in the 
         self.rect = self.image.get_rect(center = position)
         self.velocity = pygame.math.Vector2(0,0)
+        self.pos = pygame.math.Vector2(position)
 
+
+    def update(self, dt):
+        self.rect.move_ip(self.velocity)
+        self.velocity.y += gravity_constant * dt
+        self.pos.y += gravity_constant * dt
+
+        if self.velocity.y > 0 and self.rect.colliderect(target):
+            self.rect.bottom = target.top
+            # Makes sure that the ball loses some velocity
+            if abs(self.velocity.y) >= 2.0:
+                self.velocity.y *= -0.9
+            else:
+                self.velocity.y = 0
+        
+
+def circle_collision(c1, c2):
+    # normal_vector = (c1.rect.position - c2.rect.position)
+
+
+
+    
+    return 
 
 # Group to hold all the spirites
 spirite_group = pygame.sprite.Group()
@@ -63,21 +87,31 @@ while running:
     if not mouse_one_pressed:
         debounce = False
 
+    collisions = pygame.sprite.groupcollide(
+        spirite_group,
+        spirite_group,
+        False,
+        False,
+        collided=pygame.sprite.collide_rect
+    )
+
+    for circle, hit_list in collisions.items():
+        for hit_circle in hit_list:
+            circle_collision(circle, hit_circle)
+
+
     for ball in spirite_group:
-        ball.rect.move_ip(ball.velocity)
-        ball.velocity.y += gravity_constant * dt
-        if ball.rect.colliderect(target):
-            ball.velocity.y *= -1
+        ball.update(dt)
+            
 
     screen.fill((255,255,255))
     pygame.draw.rect(screen, "green", target)
     spirite_group.draw(screen)
     pygame.display.flip()
 
-    dt = clock.tick(60) / 1000
+    dt = clock.tick(120) / 1000
 
-
-
+    
 
 pygame.quit()
 
