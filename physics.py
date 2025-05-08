@@ -36,9 +36,10 @@ class Circle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = position)
         self.velocity = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(position)
+        self.radius = radius
 
 
-    def update(self, dt):
+    def update_gravity(self, dt):
         self.rect.move_ip(self.velocity)
         self.velocity.y += gravity_constant * dt
         self.pos.y += gravity_constant * dt
@@ -53,12 +54,12 @@ class Circle(pygame.sprite.Sprite):
         
 
 def circle_collision(c1, c2):
-    # normal_vector = (c1.rect.position - c2.rect.position)
-
-
-
+    normal_line = (c2.pos.y - c1.pos.y) / abs(c2.pos.x - c1.pos.x)
     
     return 
+
+
+
 
 # Group to hold all the spirites
 spirite_group = pygame.sprite.Group()
@@ -92,16 +93,19 @@ while running:
         spirite_group,
         False,
         False,
-        collided=pygame.sprite.collide_rect
+        collided=pygame.sprite.collide_circle
     )
 
     for circle, hit_list in collisions.items():
         for hit_circle in hit_list:
-            circle_collision(circle, hit_circle)
+            if circle is not hit_circle:
+                circle_collision(circle, hit_circle)
+
+
 
 
     for ball in spirite_group:
-        ball.update(dt)
+        ball.update_gravity(dt)
             
 
     screen.fill((255,255,255))
